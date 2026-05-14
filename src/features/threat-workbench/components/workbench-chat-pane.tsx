@@ -20,6 +20,8 @@ import {
 
 import type { ThreatWorkbenchMessage } from "../types";
 
+const ARTIFACT_MARKER = "THREAT_ARTIFACT_JSON";
+
 type WorkbenchChatPaneProps = Readonly<{
   messages: ThreatWorkbenchMessage[];
   status: "submitted" | "streaming" | "ready" | "error";
@@ -30,9 +32,36 @@ type WorkbenchChatPaneProps = Readonly<{
   onStop: () => void;
 }>;
 
+const STARTER_PROMPTS = [
+  "Threat model this design and infer missing details from the architecture.",
+  "Identify trust boundaries, sensitive data stores, and top STRIDE risks.",
+  "Generate prioritized mitigations and open security questions.",
+] as const;
+
 function roleLabel(role: ThreatWorkbenchMessage["role"]) {
   return role === "user" ? "You" : "Assistant";
 }
+
+const stripArtifactText = (text: string): string => {
+  const markerIdx = text.lastIndexOf(ARTIFACT_MARKER);
+  if (markerIdx === -1) {
+    return text;
+  }
+
+  const beforeMarker = text.slice(0, markerIdx).trimEnd();
+  return beforeMarker
+    .replace(/\n?```(?:json)?\s*[\s\S]*?```\s*$/i, "")
+    .trimEnd();
+};
+
+const visibleMessageText = (message: ThreatWorkbenchMessage): string => (
+  message.parts
+    .filter(isTextUIPart)
+    .map((part) => part.text)
+    .map((text) => (message.role === "assistant" ? stripArtifactText(text) : text))
+    .join("\n\n")
+    .trim()
+);
 
 export const WorkbenchChatPane = ({
   messages,
@@ -50,24 +79,42 @@ export const WorkbenchChatPane = ({
       <PanelHeader>
         <Heading as="h2">Session</Heading>
         <Text tone="muted" size="sm" className="mt-1">
-          Describe the system; ask for threats when ready.
+          Paste a design doc, architecture sketch, or workflow. The assistant
+          will infer a first-pass STRIDE model when enough detail is present.
         </Text>
+        <HStack gap={2} wrap className="mt-3 items-start">
+          {STARTER_PROMPTS.map((prompt) => (
+            <Button
+              key={prompt}
+              type="button"
+              variant="outline"
+              className="justify-start whitespace-normal text-left"
+              onClick={() => onInputChange(prompt)}
+              disabled={busy}
+            >
+              {prompt}
+            </Button>
+          ))}
+        </HStack>
       </PanelHeader>
 
       <VStack gap={3} className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
-        {messages.map((message) => (
-          <MessageBubble
-            key={message.id}
-            role={message.role === "user" ? "user" : "assistant"}
-            label={roleLabel(message.role)}
-          >
-            {message.parts.filter(isTextUIPart).map((part, i) => (
-              <BubbleBody key={`${message.id}-text-${i}`}>
-                {part.text}
-              </BubbleBody>
-            ))}
-          </MessageBubble>
-        ))}
+        {messages.map((message) => {
+          const text = visibleMessageText(message);
+          if (!text) {
+            return null;
+          }
+
+          return (
+            <MessageBubble
+              key={message.id}
+              role={message.role === "user" ? "user" : "assistant"}
+              label={roleLabel(message.role)}
+            >
+              <BubbleBody>{text}</BubbleBody>
+            </MessageBubble>
+          );
+        })}
       </VStack>
 
       {error ? <AlertBanner>{error.message}</AlertBanner> : null}

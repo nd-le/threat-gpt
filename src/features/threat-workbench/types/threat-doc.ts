@@ -20,6 +20,15 @@ export const strideRowSchema = z.object({
   note: z.string().optional(),
 });
 
+export const mitigationSchema = z.object({
+  id: z.string(),
+  threatId: z.string().optional(),
+  title: z.string(),
+  action: z.string(),
+  priority: z.enum(["P0", "P1", "P2", "P3"]).optional(),
+  owner: z.string().optional(),
+});
+
 export const threatArtifactSchema = z.object({
   summary: z.string(),
   graph: z.object({
@@ -27,11 +36,15 @@ export const threatArtifactSchema = z.object({
     edges: z.array(threatGraphEdgeSchema),
   }),
   stride: z.array(strideRowSchema),
+  mitigations: z.array(mitigationSchema).optional(),
+  assumptions: z.array(z.string()).optional(),
+  openQuestions: z.array(z.string()).optional(),
 });
 
 export type ThreatGraphNode = z.infer<typeof threatGraphNodeSchema>;
 export type ThreatGraphEdge = z.infer<typeof threatGraphEdgeSchema>;
 export type StrideRow = z.infer<typeof strideRowSchema>;
+export type ThreatMitigation = z.infer<typeof mitigationSchema>;
 export type ThreatArtifact = z.infer<typeof threatArtifactSchema>;
 
 export type ThreatDocData =

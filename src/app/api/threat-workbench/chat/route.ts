@@ -6,7 +6,10 @@ import {
   streamText,
 } from "ai";
 
-import { THREAT_WORKBENCH_SYSTEM } from "@/features/threat-workbench/config";
+import {
+  DEFAULT_WORKBENCH_MODEL,
+  THREAT_WORKBENCH_SYSTEM,
+} from "@/features/threat-workbench/config";
 import { parseThreatArtifact } from "@/features/threat-workbench/lib";
 import type { ThreatWorkbenchMessage } from "@/features/threat-workbench/types";
 
@@ -46,7 +49,7 @@ export const POST = async (req: Request) => {
   }
 
   const openai = createOpenAI({ apiKey: resolvedKey });
-  const modelId = model?.trim() || "gpt-4o-mini";
+  const modelId = model?.trim() || DEFAULT_WORKBENCH_MODEL;
 
   const stream = createUIMessageStream<ThreatWorkbenchMessage>({
     execute: async ({ writer }) => {
