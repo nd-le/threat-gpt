@@ -15,11 +15,11 @@ import {
   TopBar,
 } from "@/components/ui";
 
-import { DEFAULT_WORKBENCH_MODEL, WORKBENCH_OPENAI_MODELS } from "./config";
-import { WorkbenchCanvasPane } from "./components/workbench-canvas-pane";
-import { WorkbenchChatPane } from "./components/workbench-chat-pane";
+import { DEFAULT_WORKBENCH_MODEL, WORKBENCH_OPENAI_MODELS } from "./config/models";
 import { useThreatWorkbenchChat } from "./hooks";
-import { getLatestThreatDoc } from "./lib";
+import { getLatestThreatDoc } from "./lib/select-latest-doc";
+import { WorkbenchCanvasPane } from "./workbench-canvas-pane";
+import { WorkbenchChatPane } from "./workbench-chat-pane";
 
 export const ThreatWorkbench = () => {
   const [model, setModel] = useState<string>(DEFAULT_WORKBENCH_MODEL);

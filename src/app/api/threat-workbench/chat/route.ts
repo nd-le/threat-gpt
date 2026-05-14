@@ -6,11 +6,9 @@ import {
   streamText,
 } from "ai";
 
-import {
-  DEFAULT_WORKBENCH_MODEL,
-  THREAT_WORKBENCH_SYSTEM,
-} from "@/features/threat-workbench/config";
-import { parseThreatArtifact } from "@/features/threat-workbench/lib";
+import { DEFAULT_WORKBENCH_MODEL } from "@/features/threat-workbench/config/models";
+import { THREAT_WORKBENCH_SYSTEM } from "@/features/threat-workbench/config/prompts";
+import { parseThreatArtifact } from "@/features/threat-workbench/lib/parse-artifact";
 import type { ThreatWorkbenchMessage } from "@/features/threat-workbench/types";
 
 export const maxDuration = 120;
